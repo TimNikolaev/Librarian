@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"librarian/pkg/e"
-	"librarian/storage"
+	"librarian/repository"
 	"math/rand"
 	"os"
 	"path/filepath"
 )
 
-type Storage struct {
+type Repository struct {
 	basePath string
 }
 
@@ -21,14 +21,14 @@ const (
 
 var ErrNoSavedPages = errors.New("no saved page")
 
-func New(basePath string) *Storage {
-	return &Storage{basePath: basePath}
+func New(basePath string) *Repository {
+	return &Repository{basePath: basePath}
 }
 
-func (s *Storage) Save(page *storage.Page) error {
+func (r *Repository) Save(page *repository.Page) error {
 	const msgErr = "can't save page"
 
-	fPath := filepath.Join(s.basePath, page.UserName)
+	fPath := filepath.Join(r.basePath, page.UserName)
 
 	if err := os.MkdirAll(fPath, defaultPerm); err != nil {
 		return e.Wrap(msgErr, err)
@@ -54,10 +54,10 @@ func (s *Storage) Save(page *storage.Page) error {
 	return nil
 }
 
-func (s *Storage) PickRandom(userName string) (*storage.Page, error) {
+func (r *Repository) PickRandom(userName string) (*repository.Page, error) {
 	const msgErr = "can't pick random page"
 
-	fPath := filepath.Join(s.basePath, userName)
+	fPath := filepath.Join(r.basePath, userName)
 
 	files, err := os.ReadDir(fPath)
 	if err != nil {
@@ -72,16 +72,16 @@ func (s *Storage) PickRandom(userName string) (*storage.Page, error) {
 
 	randFile := files[n]
 
-	return s.decodePage(filepath.Join(fPath, randFile.Name()))
+	return r.decodePage(filepath.Join(fPath, randFile.Name()))
 }
 
-func (s *Storage) Remove(p *storage.Page) error {
+func (r *Repository) Remove(p *repository.Page) error {
 	fName, err := fileName(p)
 	if err != nil {
 		return e.Wrap("can't remove file", err)
 	}
 
-	fPath := filepath.Join(s.basePath, p.UserName, fName)
+	fPath := filepath.Join(r.basePath, p.UserName, fName)
 
 	if err := os.Remove(fPath); err != nil {
 		msg := fmt.Sprintf("can't remove file %s", fPath)
@@ -92,13 +92,13 @@ func (s *Storage) Remove(p *storage.Page) error {
 	return nil
 }
 
-func (s *Storage) IsExists(p *storage.Page) (bool, error) {
+func (r *Repository) IsExists(p *repository.Page) (bool, error) {
 	fName, err := fileName(p)
 	if err != nil {
 		return false, e.Wrap("can't check if file exists", err)
 	}
 
-	fPath := filepath.Join(s.basePath, p.UserName, fName)
+	fPath := filepath.Join(r.basePath, p.UserName, fName)
 
 	switch _, err = os.Stat(fPath); {
 	case errors.Is(err, os.ErrNotExist):
@@ -112,14 +112,14 @@ func (s *Storage) IsExists(p *storage.Page) (bool, error) {
 	return true, nil
 }
 
-func (s *Storage) decodePage(filePath string) (*storage.Page, error) {
+func (r *Repository) decodePage(filePath string) (*repository.Page, error) {
 	f, err := os.Open(filePath)
 	if err != nil {
 		return nil, e.Wrap("can't decode page", err)
 	}
 	defer func() { _ = f.Close() }()
 
-	var p storage.Page
+	var p repository.Page
 
 	if err := gob.NewDecoder(f).Decode(&p); err != nil {
 		return nil, e.Wrap("can't decode page", err)
@@ -128,6 +128,6 @@ func (s *Storage) decodePage(filePath string) (*storage.Page, error) {
 	return &p, nil
 }
 
-func fileName(p *storage.Page) (string, error) {
+func fileName(p *repository.Page) (string, error) {
 	return p.Hash()
 }

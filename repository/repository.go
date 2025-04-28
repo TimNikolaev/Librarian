@@ -1,4 +1,4 @@
-package storage
+package repository
 
 import (
 	"crypto/sha1"
@@ -6,7 +6,7 @@ import (
 	"librarian/pkg/e"
 )
 
-type Storage interface {
+type Repository interface {
 	Save(p *Page) error
 	PickRandom(userName string) (*Page, error)
 	Remove(p *Page) error
