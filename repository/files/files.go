@@ -19,8 +19,6 @@ const (
 	defaultPerm = 0774
 )
 
-var ErrNoSavedPages = errors.New("no saved page")
-
 func New(basePath string) *Repository {
 	return &Repository{basePath: basePath}
 }
@@ -65,7 +63,7 @@ func (r *Repository) PickRandom(userName string) (*repository.Page, error) {
 	}
 
 	if len(files) == 0 {
-		return nil, ErrNoSavedPages
+		return nil, repository.ErrNoSavedPages
 	}
 
 	n := rand.Intn(len(files))

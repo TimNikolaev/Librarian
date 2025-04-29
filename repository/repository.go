@@ -2,6 +2,7 @@ package repository
 
 import (
 	"crypto/sha1"
+	"errors"
 	"io"
 	"librarian/pkg/e"
 )
@@ -12,6 +13,8 @@ type Repository interface {
 	Remove(p *Page) error
 	IsExists(p *Page) (bool, error)
 }
+
+var ErrNoSavedPages = errors.New("no saved page")
 
 type Page struct {
 	URL      string
