@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	tgClient "librarian/clients/telegram"
-	event_consumer "librarian/consumer/event-consumer"
+	"librarian/consumer/event_consumer"
 	"librarian/events/telegram"
 	"librarian/repository/files"
 	"log"
@@ -11,7 +11,7 @@ import (
 
 const (
 	tgBotHost      = "api.telegram.org"
-	repositoryPath = "repository"
+	repositoryPath = "files_repository"
 	batchSize      = 100
 )
 
