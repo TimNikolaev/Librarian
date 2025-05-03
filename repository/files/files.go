@@ -23,16 +23,16 @@ func New(basePath string) *Repository {
 	return &Repository{basePath: basePath}
 }
 
-func (r *Repository) Save(page *repository.Page) error {
+func (r *Repository) Save(p *repository.Page) error {
 	const msgErr = "can't save page"
 
-	fPath := filepath.Join(r.basePath, page.UserName)
+	fPath := filepath.Join(r.basePath, p.UserName)
 
 	if err := os.MkdirAll(fPath, defaultPerm); err != nil {
 		return e.Wrap(msgErr, err)
 	}
 
-	fName, err := fileName(page)
+	fName, err := fileName(p)
 	if err != nil {
 		return e.Wrap(msgErr, err)
 	}
@@ -45,7 +45,7 @@ func (r *Repository) Save(page *repository.Page) error {
 	}
 	defer func() { _ = file.Close() }()
 
-	if err := gob.NewEncoder(file).Encode(page); err != nil {
+	if err := gob.NewEncoder(file).Encode(p); err != nil {
 		return e.Wrap(msgErr, err)
 	}
 
@@ -111,15 +111,15 @@ func (r *Repository) IsExists(p *repository.Page) (bool, error) {
 }
 
 func (r *Repository) decodePage(filePath string) (*repository.Page, error) {
-	f, err := os.Open(filePath)
+	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, e.Wrap("can't decode page", err)
 	}
-	defer func() { _ = f.Close() }()
+	defer func() { _ = file.Close() }()
 
 	var p repository.Page
 
-	if err := gob.NewDecoder(f).Decode(&p); err != nil {
+	if err := gob.NewDecoder(file).Decode(&p); err != nil {
 		return nil, e.Wrap("can't decode page", err)
 	}
 

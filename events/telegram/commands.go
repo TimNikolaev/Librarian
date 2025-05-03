@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"context"
 	"errors"
 	"librarian/pkg/e"
 	"librarian/repository"
@@ -44,7 +45,7 @@ func (p *EventProcessor) savePage(chatID int, pageURL string, userName string) e
 		UserName: userName,
 	}
 
-	isExists, err := p.repository.IsExists(page)
+	isExists, err := p.repository.IsExists(context.Background(), page)
 	if err != nil {
 		return e.Wrap(msgErr, err)
 	}
@@ -52,7 +53,7 @@ func (p *EventProcessor) savePage(chatID int, pageURL string, userName string) e
 		return p.tg.SendMessage(chatID, msgAlreadyExists)
 	}
 
-	if err := p.repository.Save(page); err != nil {
+	if err := p.repository.Save(context.Background(), page); err != nil {
 		return e.Wrap(msgErr, err)
 	}
 
@@ -66,7 +67,7 @@ func (p *EventProcessor) savePage(chatID int, pageURL string, userName string) e
 func (p *EventProcessor) sendRandom(chatID int, userName string) error {
 	const msgErr = "can't do command: can't send random"
 
-	page, err := p.repository.PickRandom(userName)
+	page, err := p.repository.PickRandom(context.Background(), userName)
 	if err != nil && !errors.Is(err, repository.ErrNoSavedPages) {
 		return e.Wrap(msgErr, err)
 	}
@@ -78,7 +79,7 @@ func (p *EventProcessor) sendRandom(chatID int, userName string) error {
 		return e.Wrap(msgErr, err)
 	}
 
-	return p.repository.Remove(page)
+	return p.repository.Remove(context.Background(), page)
 }
 
 func (p *EventProcessor) sendHelp(chatID int) error {
