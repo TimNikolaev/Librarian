@@ -27,7 +27,7 @@ func main() {
 	// filesRepository := files.New(filesRepositoryPath)
 	sqliteRepository, err := sqlite.New(sqliteRepositoryPath)
 	if err != nil {
-		log.Fatalf("can't connect to storage:", err)
+		log.Fatalf("can't connect to storage: %s", err)
 	}
 
 	if err = sqliteRepository.Init(context.TODO()); err != nil {
